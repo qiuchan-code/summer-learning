@@ -107,26 +107,29 @@ const Quiz = {
    * 选取今日英语词汇
    */
   pickDailyWords(week, count) {
-    // 本周新词 + 之前学过的词混合
+    // 本周新词 + 之前学过的词混合，打乱确保随机性
     const allWords = [...ENGLISH_WORDS];
     const newWords = allWords.filter(w => w.week === week);
     const oldWords = allWords.filter(w => w.week < week);
 
-    const selected = [...newWords];
+    // 从新词中随机选
+    const shuffledNew = [...newWords].sort(() => Math.random() - 0.5);
+    const selected = [...shuffledNew];
+
     // 从旧词中随机挑一些复习
     const reviewsNeeded = Math.max(0, count - selected.length);
     if (reviewsNeeded > 0 && oldWords.length > 0) {
-      const shuffled = [...oldWords].sort(() => Math.random() - 0.5);
-      selected.push(...shuffled.slice(0, reviewsNeeded));
+      const shuffledOld = [...oldWords].sort(() => Math.random() - 0.5);
+      selected.push(...shuffledOld.slice(0, reviewsNeeded));
     }
 
-    // 如果还不够（比如第一周），就全用新词
-    if (selected.length < count) {
-      const moreNew = newWords.slice(0, count);
-      return moreNew;
+    // 不够的话用更多新词补充
+    while (selected.length < count && shuffledNew.length > selected.length) {
+      selected.push(shuffledNew[selected.length]);
     }
 
-    return selected.slice(0, count);
+    // 最终打乱顺序（确保新旧词混合，不按类别排列）
+    return [...selected].sort(() => Math.random() - 0.5).slice(0, count);
   },
 
   /**
@@ -149,8 +152,7 @@ const Quiz = {
       questions.push({
         type: 'multiple_choice',
         question: word.emoji + ' 这个图对应的英文是？',
-        options: this.generateWordOptions(word, words, 'en'),
-        answer: 0,
+        ...this.generateWordOptions(word, words, 'en'),
         id: 'en_pic_' + idx,
         stage: '看图识词',
         explanation: word.emoji + ' = ' + word.en + '（' + word.zh + '）'
@@ -160,51 +162,88 @@ const Quiz = {
       questions.push({
         type: 'multiple_choice',
         question: '"' + word.zh + '" 的英文是？',
-        options: this.generateWordOptions(word, words, 'en'),
-        answer: 0,
+        ...this.generateWordOptions(word, words, 'en'),
         id: 'en_match_' + idx,
         stage: '中英配对',
         explanation: word.zh + ' = ' + word.en
       });
     });
 
-    // 词汇归类题
+    // 词汇归类题（确保有同类词可出题）
     if (words.length >= 3) {
-      const word = words[Math.floor(Math.random() * words.length)];
-      const others = words.filter(w => w !== word);
-      questions.push({
-        type: 'multiple_choice',
-        question: '下面哪个和 "' + word.en + '" 是同一类？',
-        options: this.generateCategoryOptions(word, others),
-        answer: 0,
-        id: 'en_cat_' + words[0].en,
-        stage: '词汇归类',
-        explanation: word.en + ' 和正确选项属于同一类别'
-      });
+      // 找一个有同类词的单词来出归类题
+      const wordsWithSameCategory = words.filter(w =>
+        words.some(o => o !== w && o.category === w.category)
+      );
+      if (wordsWithSameCategory.length > 0) {
+        const word = wordsWithSameCategory[Math.floor(Math.random() * wordsWithSameCategory.length)];
+        const others = words.filter(w => w !== word);
+        const catResult = this.generateCategoryOptions(word, others);
+        if (catResult) {
+          // 找到同类词中的正确答案用于解释
+          const sameWord = others.find(w => w.category === word.category);
+          questions.push({
+            type: 'multiple_choice',
+            question: '下面哪个和 "' + word.en + '" （' + word.zh + '）是同一类？',
+            ...catResult,
+            id: 'en_cat_' + word.id,
+            stage: '词汇归类',
+            explanation: word.en + '（' + word.zh + '）和正确答案同属"' + word.category + '"类'
+          });
+        }
+      }
     }
 
     return questions;
   },
 
-  /** 为单选题生成干扰项（正确答案始终放在位置0，对应 answer: 0） */
+  /** 为单选题生成干扰项，随机排列选项位置 */
   generateWordOptions(correct, allWords, field) {
     const others = allWords.filter(w => w[field] !== correct[field]);
     const shuffled = [...others].sort(() => Math.random() - 0.5);
     const distractors = shuffled.slice(0, 3).map(w => w[field]);
-    // 正确答案始终在索引0，非0索引都是干扰项
-    return [correct[field], ...distractors];
+    const correctVal = correct[field];
+    const options = [correctVal, ...distractors];
+    // Fisher-Yates 打乱，让正确答案不总在第一个
+    for (let i = options.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [options[i], options[j]] = [options[j], options[i]];
+    }
+    return { options: options, answer: options.indexOf(correctVal) };
   },
 
-  /** 生成归类题选项（简化版） */
+  /** 生成归类题选项：正确答案是另一个同类词，不是原词本身 */
   generateCategoryOptions(correct, others) {
     const sameCategory = others.filter(w => w.category === correct.category);
     const diffCategory = others.filter(w => w.category !== correct.category);
-    let opts = [correct.en];
-    if (sameCategory.length > 0) opts.push(sameCategory[0].en);
-    if (diffCategory.length > 0) opts.push(diffCategory[0].en);
-    if (diffCategory.length > 1) opts.push(diffCategory[1].en);
-    while (opts.length < 4) opts.push(others[opts.length - 2]?.en || 'dog');
-    return opts;
+
+    // 没有同类词，无法出归类题
+    if (sameCategory.length === 0) return null;
+
+    // 正确答案从同类词中选（不是原词本身）
+    const shuffledSame = [...sameCategory].sort(() => Math.random() - 0.5);
+    const shuffledDiff = [...diffCategory].sort(() => Math.random() - 0.5);
+
+    let opts = [shuffledSame[0].en];
+    if (shuffledSame.length > 1) opts.push(shuffledSame[1].en);
+    for (const w of shuffledDiff) {
+      if (opts.length >= 4) break;
+      if (!opts.includes(w.en)) opts.push(w.en);
+    }
+    // 补足4个选项
+    const allOthers = [...others].sort(() => Math.random() - 0.5);
+    for (const w of allOthers) {
+      if (opts.length >= 4) break;
+      if (!opts.includes(w.en)) opts.push(w.en);
+    }
+
+    const correctAnswer = opts[0]; // 正确答案（第一个同类词）
+    // Fisher-Yates 打乱
+    for (let i = opts.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [opts[i], opts[j]] = [opts[j], opts[i]];
+    }
+    return { options: opts, answer: opts.indexOf(correctAnswer) };
   },
 
   /**
