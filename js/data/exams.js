@@ -80,9 +80,17 @@ const EXAM_SETS = (function() {
     const questions = [];
 
     selected.forEach(r => {
+      // 先插入阅读短文（info类型）
+      questions.push({
+        type: 'info',
+        title: '📖 仔细阅读下面的短文，然后回答问题',
+        content: r.passage,
+        hasPinyin: r.hasPinyin
+      });
+      // 再插入配套题目
       if (r.questions) {
-        const qs = pick(r.questions, Math.min(7, r.questions.length));
-        qs.forEach(q => questions.push({ ...q, passage: r.passage }));
+        const qs = pick(r.questions, Math.min(5, r.questions.length));
+        qs.forEach(q => questions.push({ ...q }));
       }
     });
 
