@@ -7,6 +7,7 @@ const App = {
 
   /** 初始化 */
   init() {
+    this.registerSW();
     this.refreshHome();
     this.initEasterEggs();
     this.bindSettingsEvents();
@@ -352,6 +353,15 @@ const App = {
     const overlay = document.getElementById('modalOverlay');
     if (overlay) overlay.style.display = 'none';
     this._modalButtons = [];
+  },
+
+  /** 注册 Service Worker（离线缓存） */
+  registerSW() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('📦 SW 已注册:', reg.scope))
+        .catch(err => console.warn('SW 注册失败（可能是file://协议限制，正常现象）:', err));
+    }
   },
 
   /** 初始化彩蛋 */

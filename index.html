@@ -166,17 +166,21 @@
 
   </main>
 
-  <!-- ==================== 题库数据 ==================== -->
+  <!-- ==================== 纯数据（无依赖） ==================== -->
   <script src="js/data/chinese.js"></script>
   <script src="js/data/math.js"></script>
   <script src="js/data/english.js"></script>
+
+  <!-- ==================== 数学生成器（exams.js 需要） ==================== -->
+  <script src="js/generator.js"></script>
+
+  <!-- ==================== 考核卷（依赖 generator + 数据） ==================== -->
   <script src="js/data/exams.js"></script>
 
   <!-- ==================== 核心逻辑 ==================== -->
   <script src="js/storage.js"></script>
   <script src="js/schedule.js"></script>
   <script src="js/rewards.js"></script>
-  <script src="js/generator.js"></script>
   <script src="js/quiz.js"></script>
   <script src="js/easter-eggs.js"></script>
   <script src="js/app.js"></script>
