@@ -1,15 +1,17 @@
 /**
  * auth.js — 账户系统
- * 管理员：panghui / 180803 → 完整体验
+ * 已解锁账号（完整权限）：panghui / 180803、goodbaby / 123456
  * 游客：仅能体验第1天内容，之后提示联系管理员
  */
 
 const Auth = {
   KEY: 'summer_auth',
 
-  /** 管理员账号 */
-  ADMIN_USER: 'panghui',
-  ADMIN_PASS: '180803',
+  /** 已解锁账号列表 */
+  ACCOUNTS: {
+    'panghui': '180803',
+    'goodbaby': '123456'
+  },
 
   /** 获取当前认证状态 */
   get() {
@@ -26,10 +28,10 @@ const Auth = {
     } catch { /* localStorage 不可用 */ }
   },
 
-  /** 管理员登录 */
+  /** 登录 */
   login(username, password) {
-    if (username === this.ADMIN_USER && password === this.ADMIN_PASS) {
-      this.save({ type: 'admin', loginTime: Date.now() });
+    if (this.ACCOUNTS[username] === password) {
+      this.save({ type: 'admin', username: username, loginTime: Date.now() });
       return { success: true };
     }
     return { success: false, error: '账号或密码错误，请重试' };

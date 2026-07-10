@@ -492,7 +492,7 @@ h1, h2, h3, .door-title, .hand-font {
   background: var(--yellow);
   padding: 8px 20px;
   border-radius: 20px;
-  font-family: var(--font-hand);
+  font-family: 'KaiTi', 'STKaiti', '楷体', var(--font-main);
   font-size: 1rem;
   color: var(--brown);
   margin: 10px 0;
