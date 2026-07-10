@@ -337,6 +337,168 @@ h1, h2, h3, .door-title, .hand-font {
 .settings-panel button:hover { background: var(--gray-light); }
 .settings-panel .danger-btn { color: var(--red); border-color: var(--red); }
 
+/* ─── 登录覆盖层 ─── */
+#loginOverlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg);
+  background-image:
+    url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+#loginOverlay.hidden { display: none; }
+
+.login-card {
+  background: #FFFDF5;
+  border: 2px dashed var(--gray);
+  border-radius: 24px;
+  padding: 36px 28px 28px;
+  max-width: 380px; width: 100%;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  /* 轻微旋转增加手作感 */
+  transform: rotate(-0.5deg);
+}
+.login-card::before {
+  content: '';
+  position: absolute; top: 10px; left: 20px; right: 20px; height: 2px;
+  background: repeating-linear-gradient(90deg, var(--orange) 0, var(--orange) 3px, transparent 3px, transparent 6px);
+  opacity: 0.4;
+}
+
+.login-mascot {
+  font-size: 4rem;
+  animation: bounce 1.5s ease infinite;
+  margin-bottom: 4px;
+}
+
+.login-title {
+  font-family: var(--font-hand);
+  font-size: 1.8rem;
+  color: var(--orange);
+  margin-bottom: 4px;
+  letter-spacing: 0.08em;
+}
+
+.login-sub {
+  font-size: 0.95rem;
+  color: var(--brown-light);
+  margin-bottom: 24px;
+}
+
+/* 表单 */
+.login-form { text-align: left; }
+
+.login-field {
+  margin-bottom: 14px;
+}
+.login-field label {
+  display: block;
+  font-family: var(--font-hand);
+  font-size: 0.95rem;
+  color: var(--brown);
+  margin-bottom: 4px;
+}
+.login-field input {
+  width: 100%; padding: 10px 14px;
+  border: 2px solid var(--gray-light);
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: var(--font-main);
+  background: var(--bg);
+  color: var(--brown);
+  transition: border-color 0.2s;
+  outline: none;
+}
+.login-field input:focus {
+  border-color: var(--orange);
+}
+
+.login-error {
+  color: var(--red);
+  font-size: 0.85rem;
+  min-height: 20px;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.login-btn {
+  width: 100%; padding: 12px;
+  background: var(--orange);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-family: var(--font-hand);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 0 #D96B35;
+}
+.login-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #D96B35; }
+
+.login-divider {
+  display: flex; align-items: center;
+  margin: 20px 0;
+  color: var(--gray);
+  font-size: 0.85rem;
+}
+.login-divider::before, .login-divider::after {
+  content: '';
+  flex: 1; height: 1px;
+  background: var(--gray-light);
+}
+.login-divider span { padding: 0 12px; }
+
+.guest-btn {
+  width: 100%; padding: 10px;
+  background: transparent;
+  color: var(--brown-light);
+  border: 2px solid var(--gray);
+  border-radius: 14px;
+  font-family: var(--font-hand);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.guest-btn:hover { border-color: var(--orange); color: var(--orange); }
+
+.login-footer {
+  margin-top: 16px;
+  font-size: 0.78rem;
+  color: var(--gray);
+}
+
+/* ─── 权限提示弹窗（游客升级） ─── */
+.upgrade-modal {
+  text-align: center;
+  padding: 10px 0;
+}
+.upgrade-modal .um-icon { font-size: 3rem; margin-bottom: 8px; }
+.upgrade-modal h3 {
+  font-family: var(--font-hand);
+  font-size: 1.3rem;
+  color: var(--orange);
+  margin-bottom: 10px;
+}
+.upgrade-modal p {
+  font-size: 0.95rem;
+  color: var(--brown);
+  line-height: 1.8;
+  margin-bottom: 6px;
+}
+.upgrade-modal .um-contact {
+  display: inline-block;
+  background: var(--yellow);
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-family: var(--font-hand);
+  font-size: 1rem;
+  color: var(--brown);
+  margin: 10px 0;
+  border: 2px dashed var(--orange);
+}
+
 /* ─── 响应式 ─── */
 @media (min-width: 640px) {
   .subject-doors { gap: 18px; }

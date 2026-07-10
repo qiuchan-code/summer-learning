@@ -3,7 +3,7 @@
  * 让小朋友在没有网络的情况下也能学习
  */
 
-const CACHE_NAME = 'summer-learning-v1';
+const CACHE_NAME = 'summer-learning-v2';
 
 // 需要预缓存的核心文件
 const PRE_CACHE = [
@@ -17,6 +17,7 @@ const PRE_CACHE = [
   './js/generator.js',
   './js/quiz.js',
   './js/easter-eggs.js',
+  './js/auth.js',
   './js/data/chinese.js',
   './js/data/math.js',
   './js/data/english.js',

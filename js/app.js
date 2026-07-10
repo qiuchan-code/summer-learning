@@ -1,20 +1,139 @@
 /**
  * app.js — 主控制器
- * 负责：应用初始化、视图切换、事件绑定、首页数据刷新
+ * 负责：应用初始化、登录流程、视图切换、事件绑定、首页数据刷新
  */
 
 const App = {
 
   /** 初始化 */
   init() {
+    // 先检查登录状态
+    if (!Auth.isLoggedIn()) {
+      this.showLoginScreen();
+      return;
+    }
+
+    // 已登录：游客检查是否超出体验范围
+    if (Auth.isGuest() && Auth.guestDay1Done()) {
+      // 游客已完成第1天，再次进入时显示升级提示
+      setTimeout(() => this.showUpgradeModal(), 500);
+    }
+
+    this.startApp();
+  },
+
+  /** 启动主应用（登录后调用） */
+  startApp() {
     this.registerSW();
     this.refreshHome();
     this.initEasterEggs();
     this.bindSettingsEvents();
     this.setupGlobalListeners();
     console.log('🎒 暑假学习小助手已就绪！');
+    console.log('👤 当前身份：' + (Auth.isAdmin() ? '管理员' : '游客'));
     console.log('📅 今天是第' + Schedule.getDayNumber() + '天，第' + Schedule.getWeekNumber() + '周');
     console.log('📝 考核日：' + (Schedule.isExamDay() ? '是！' : '否，还有' + Schedule.daysUntilNextExam() + '天'));
+  },
+
+  /** 显示登录界面 */
+  showLoginScreen() {
+    const overlay = document.getElementById('loginOverlay');
+    if (overlay) overlay.classList.remove('hidden');
+
+    // 绑定登录按钮
+    const loginBtn = document.getElementById('loginBtn');
+    const guestBtn = document.getElementById('guestBtn');
+    const userInput = document.getElementById('loginUser');
+    const passInput = document.getElementById('loginPass');
+    const errorEl = document.getElementById('loginError');
+
+    // 清除旧事件（防止重复绑定）
+    const doLogin = () => {
+      const user = (userInput?.value || '').trim();
+      const pass = (passInput?.value || '').trim();
+
+      if (!user || !pass) {
+        if (errorEl) errorEl.textContent = '请输入账号和密码';
+        return;
+      }
+
+      const result = Auth.login(user, pass);
+      if (result.success) {
+        if (overlay) overlay.classList.add('hidden');
+        this.startApp();
+      } else {
+        if (errorEl) errorEl.textContent = result.error;
+        if (passInput) passInput.value = '';
+      }
+    };
+
+    const doGuest = () => {
+      Auth.loginAsGuest();
+      if (overlay) overlay.classList.add('hidden');
+
+      // 如果游客之前已完成第1天，直接显示升级提示
+      if (Auth.guestDay1Done()) {
+        this.startApp();
+        setTimeout(() => this.showUpgradeModal(), 600);
+      } else {
+        this.startApp();
+        // 欢迎提示
+        setTimeout(() => {
+          this.showModal('👀 游客体验模式',
+            '<div class="upgrade-modal">' +
+            '<div class="um-icon">🎒</div>' +
+            '<p>欢迎体验暑假学习小助手！</p>' +
+            '<p>你目前是<strong>游客体验模式</strong>，可以完整体验<strong>第1天</strong>的学习内容。</p>' +
+            '<p style="color:var(--brown-light);font-size:0.85rem;">如需解锁全部53天内容，请联系管理员。</p>' +
+            '<div class="um-contact">📱 微信：lqcf0524</div>' +
+            '</div>',
+            [{ text: '开始体验', cls: '', action: () => this.closeModal() }]
+          );
+        }, 400);
+      }
+    };
+
+    if (loginBtn) loginBtn.onclick = doLogin;
+    if (guestBtn) guestBtn.onclick = doGuest;
+
+    // 回车登录
+    if (passInput) {
+      passInput.onkeydown = (e) => {
+        if (e.key === 'Enter') doLogin();
+      };
+    }
+    if (userInput) {
+      userInput.onkeydown = (e) => {
+        if (e.key === 'Enter') (passInput || userInput).focus();
+      };
+    }
+  },
+
+  /** 显示游客升级提示 */
+  showUpgradeModal() {
+    this.showModal('🔒 权限提示',
+      '<div class="upgrade-modal">' +
+      '<div class="um-icon">🔐</div>' +
+      '<h3>体验模式已结束</h3>' +
+      '<p>你目前是<strong>游客体验模式</strong>，仅能体验第一天的内容。</p>' +
+      '<p>想要继续后面 52 天的学习、参加考核、获取徽章吗？</p>' +
+      '<p style="margin-top:4px;">联系管理员开放全部权限：</p>' +
+      '<div class="um-contact">📱 微信：lqcf0524</div>' +
+      '<p style="font-size:0.8rem;color:var(--brown-light);margin-top:8px;">' +
+      '开通后你将获得：全部53天学习内容 · 7次周考核 · 期末考试 · 积分徽章贴纸系统</p>' +
+      '</div>',
+      [
+        { text: '我知道了', cls: '', action: () => this.closeModal() },
+        { text: '🔑 切换账号登录', cls: 'secondary', action: () => { this.closeModal(); this.doLogout(); } }
+      ]
+    );
+  },
+
+  /** 退出登录 */
+  doLogout() {
+    Auth.logout();
+    // 刷新页面回到登录界面
+    location.reload();
   },
 
   /** 刷新首页数据 */
@@ -67,13 +186,16 @@ const App = {
       }
     }
 
+    // 游客身份标签
+    this.refreshGuestBadge();
+
     // 三科完成状态
     this.refreshSubjectDoors();
 
-    // 考核入口
+    // 考核入口（仅管理员可见）
     const examEntrance = document.getElementById('examEntrance');
     if (examEntrance) {
-      if (isExam && dayNum >= 1 && dayNum <= 53) {
+      if (isExam && dayNum >= 1 && dayNum <= 53 && Auth.isAdmin()) {
         examEntrance.style.display = 'block';
       } else {
         examEntrance.style.display = 'none';
@@ -82,6 +204,30 @@ const App = {
 
     // 吉祥物
     this.updateMascot();
+  },
+
+  /** 游客身份标识 */
+  refreshGuestBadge() {
+    // 在首页顶部显示游客标签
+    let badge = document.getElementById('guestBadge');
+    if (Auth.isGuest()) {
+      if (!badge) {
+        badge = document.createElement('div');
+        badge.id = 'guestBadge';
+        badge.style.cssText = 'text-align:center;padding:6px;margin:4px 0;background:#FFF3E0;' +
+          'border-radius:10px;font-size:0.82rem;color:#E65100;border:1px dashed #FFB74D;';
+        const header = document.querySelector('.home-header');
+        if (header) header.after(badge);
+      }
+      const dayNum = Schedule.getDayNumber();
+      if (dayNum > 1 || Auth.guestDay1Done()) {
+        badge.innerHTML = '🔒 游客模式 · 仅可体验第1天 · <a href="#" onclick="App.showUpgradeModal();return false;" style="color:#FF7B42;">解锁全部</a>';
+      } else {
+        badge.innerHTML = '👀 游客体验中 · 第1天免费体验 · <a href="#" onclick="App.showUpgradeModal();return false;" style="color:#FF7B42;">了解详情</a>';
+      }
+    } else {
+      if (badge) badge.remove();
+    }
   },
 
   /** 刷新学科入口状态 */
@@ -126,11 +272,13 @@ const App = {
       exam: ['考核日加油！', '你是最棒的！', '冷静仔细，一定行！'],
       allDone: ['太厉害了！全部完成！', '今天收获满满！', '明天继续加油哦~'],
       idle: ['来学习吧！', '点击上面的学科开始~', '积少成多，水滴石穿'],
-      streak: ['连续' + data.streak + '天！超棒！', '坚持就是胜利！']
+      streak: ['连续' + data.streak + '天！超棒！', '坚持就是胜利！'],
+      guest: ['欢迎来体验！', '试试第一天的内容吧~']
     };
 
     let pool;
-    if (isExam && !allDone) pool = speeches.exam;
+    if (Auth.isGuest() && !allDone) pool = speeches.guest;
+    else if (isExam && !allDone) pool = speeches.exam;
     else if (allDone) pool = speeches.allDone;
     else if (data.streak >= 7) pool = speeches.streak;
     else pool = speeches.idle;
@@ -147,6 +295,16 @@ const App = {
 
   /** 打开练习 */
   openPractice(subject) {
+    const dayNum = Schedule.getDayNumber();
+
+    // 游客权限检查
+    if (Auth.isGuest()) {
+      if (dayNum > 1 || Auth.guestDay1Done()) {
+        this.showUpgradeModal();
+        return;
+      }
+    }
+
     const names = { chinese: '语文 · 名著阅读', math: '数学 · 计算题', english: '英语 · 单词背诵' };
     const titleEl = document.getElementById('practiceTitle');
     if (titleEl) titleEl.textContent = names[subject];
@@ -161,6 +319,12 @@ const App = {
 
   /** 打开考核 */
   openExam() {
+    // 仅管理员可考核
+    if (!Auth.isAdmin()) {
+      this.showUpgradeModal();
+      return;
+    }
+
     const week = Schedule.getWeekNumber();
     const titleEl = document.getElementById('examTitle');
     if (titleEl) {
@@ -175,8 +339,28 @@ const App = {
   /** 返回首页 */
   backToHome() {
     Quiz.stopTimer();
+
+    // 检查游客是否完成了第1天
+    this.checkGuestDay1Complete();
+
     this.switchView('home');
     this.refreshHome();
+  },
+
+  /** 检查游客是否完成了第1天的全部三科 */
+  checkGuestDay1Complete() {
+    if (!Auth.isGuest()) return;
+    if (Auth.guestDay1Done()) return;
+
+    const dayNum = Schedule.getDayNumber();
+    if (dayNum !== 1) return;
+
+    // 检查三科是否全部完成
+    if (Storage.isAllDoneToday()) {
+      Auth.markGuestDay1Done();
+      // 延迟显示升级提示，等回到首页后再弹
+      setTimeout(() => this.showUpgradeModal(), 800);
+    }
   },
 
   /** 切换视图 */
@@ -221,7 +405,6 @@ const App = {
 
     // 53天日历
     for (let day = 1; day <= 53; day++) {
-      // 计算日期
       const d = new Date(Schedule.START_DATE);
       d.setDate(d.getDate() + day - 1);
       const dateStr = d.getFullYear() + '-' +
@@ -394,6 +577,12 @@ const App = {
         d.settings.sound = soundCheck.checked;
         Storage.save(d);
       };
+    }
+
+    // 退出登录按钮
+    const logoutBtn = document.getElementById('settingLogout');
+    if (logoutBtn) {
+      logoutBtn.onclick = () => this.doLogout();
     }
   },
 
