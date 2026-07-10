@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="暑假学习">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#FFF8EC">
+  <title>🎒 我的暑假学习之旅</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='80'>🌞</text></svg>">
+</head>
+<body>
+
+  <!-- ==================== 主容器 ==================== -->
+  <main id="app">
+
+    <!-- ─── 首页仪表盘 ─── -->
+    <section id="view-home" class="view active">
+      <header class="home-header">
+        <div class="date-badge" id="dateBadge">7月10日 周四</div>
+        <div class="week-info" id="weekInfo">第1周 · 第1天</div>
+        <div class="streak-badge" id="streakBadge">🔥 0天</div>
+      </header>
+
+      <!-- 吉祥物 -->
+      <div class="mascot-container" id="mascotContainer">
+        <div class="mascot" id="mascot">🐛</div>
+        <div class="mascot-speech" id="mascotSpeech">今天也要加油哦！</div>
+      </div>
+
+      <!-- 星星积分 -->
+      <div class="star-jar" id="starJar">
+        <span class="star-icon">⭐</span>
+        <span class="star-count" id="starCount">0</span>
+        <span class="star-rank" id="starRank">🌱 学习小芽</span>
+      </div>
+
+      <!-- 距考核倒计时 -->
+      <div class="exam-countdown" id="examCountdown">
+        📝 距下次考核还有 <strong id="countdownDays">6</strong> 天
+      </div>
+
+      <!-- 三科学科入口 -->
+      <div class="subject-doors">
+        <button class="subject-door chinese" id="doorChinese" onclick="App.openPractice('chinese')">
+          <span class="door-icon">📖</span>
+          <span class="door-title">语 文</span>
+          <span class="door-subtitle">名著阅读</span>
+          <span class="door-status" id="statusChinese">待完成</span>
+        </button>
+        <button class="subject-door math" id="doorMath" onclick="App.openPractice('math')">
+          <span class="door-icon">🧮</span>
+          <span class="door-title">数 学</span>
+          <span class="door-subtitle">计算题</span>
+          <span class="door-status" id="statusMath">待完成</span>
+        </button>
+        <button class="subject-door english" id="doorEnglish" onclick="App.openPractice('english')">
+          <span class="door-icon">🔤</span>
+          <span class="door-title">英 语</span>
+          <span class="door-subtitle">单词背诵</span>
+          <span class="door-status" id="statusEnglish">待完成</span>
+        </button>
+      </div>
+
+      <!-- 考核入口（第7天解锁） -->
+      <div class="exam-entrance" id="examEntrance" style="display:none;">
+        <button class="exam-btn" onclick="App.openExam()">
+          🎯 今日考核！点击进入
+        </button>
+      </div>
+
+      <!-- 底部导航 -->
+      <nav class="bottom-nav">
+        <button class="nav-item active" onclick="App.switchView('home')">🏠 首页</button>
+        <button class="nav-item" onclick="App.switchView('progress')">📊 进度</button>
+        <button class="nav-item" onclick="App.switchView('collection')">🎖️ 收藏</button>
+        <button class="nav-item" onclick="App.switchView('settings')">⚙️ 设置</button>
+      </nav>
+    </section>
+
+    <!-- ─── 练习视图 ─── -->
+    <section id="view-practice" class="view">
+      <header class="practice-header">
+        <button class="back-btn" onclick="App.backToHome()">← 返回</button>
+        <h2 id="practiceTitle">语文练习</h2>
+        <div class="practice-timer" id="practiceTimer">⏱ 00:00</div>
+      </header>
+      <div class="practice-progress" id="practiceProgress">
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <span class="progress-text" id="progressText">0/0</span>
+      </div>
+      <div class="practice-stage" id="practiceStage">
+        <!-- 当前阶段标题 -->
+      </div>
+      <div class="practice-content" id="practiceContent">
+        <!-- 动态渲染题目 -->
+      </div>
+      <div class="practice-actions" id="practiceActions">
+        <!-- 选项按钮 / 输入区 -->
+      </div>
+      <div class="practice-feedback" id="practiceFeedback"></div>
+    </section>
+
+    <!-- ─── 考核视图 ─── -->
+    <section id="view-exam" class="view">
+      <header class="exam-header">
+        <button class="back-btn" onclick="App.backToHome()">← 返回</button>
+        <h2 id="examTitle">第1周考核</h2>
+        <div class="exam-timer" id="examTimer">⏱ 30:00</div>
+      </header>
+      <div class="exam-subject-tabs" id="examTabs">
+        <button class="exam-tab active" data-subject="chinese">语文(15题)</button>
+        <button class="exam-tab" data-subject="math">数学(25题)</button>
+        <button class="exam-tab" data-subject="english">英语(15题)</button>
+      </div>
+      <div class="exam-content" id="examContent"></div>
+      <div class="exam-actions" id="examActions"></div>
+    </section>
+
+    <!-- ─── 进度视图 ─── -->
+    <section id="view-progress" class="view">
+      <header class="sub-header">
+        <button class="back-btn" onclick="App.switchView('home')">← 返回</button>
+        <h2>📊 学习进度</h2>
+      </header>
+      <div class="progress-calendar" id="progressCalendar"></div>
+      <div class="progress-stats" id="progressStats"></div>
+      <div class="progress-chart" id="progressChart"></div>
+    </section>
+
+    <!-- ─── 收藏视图 ─── -->
+    <section id="view-collection" class="view">
+      <header class="sub-header">
+        <button class="back-btn" onclick="App.switchView('home')">← 返回</button>
+        <h2>🎖️ 我的收藏</h2>
+      </header>
+      <div class="sticker-album" id="stickerAlbum"></div>
+      <div class="badge-wall" id="badgeWall"></div>
+    </section>
+
+    <!-- ─── 设置视图 ─── -->
+    <section id="view-settings" class="view">
+      <header class="sub-header">
+        <button class="back-btn" onclick="App.switchView('home')">← 返回</button>
+        <h2>⚙️ 设置</h2>
+      </header>
+      <div class="settings-panel" id="settingsPanel">
+        <label>难度：<select id="settingDifficulty"><option value="easy">标准</option><option value="hard">挑战</option></select></label>
+        <label>音效：<input type="checkbox" id="settingSound" checked></label>
+        <button onclick="Storage.exportData()">📤 导出进度</button>
+        <button onclick="Storage.importData()">📥 导入进度</button>
+        <button class="danger-btn" onclick="Storage.resetAll()">🔄 重置所有数据</button>
+      </div>
+    </section>
+
+    <!-- ─── 结果/完成弹窗 ─── -->
+    <div class="modal-overlay" id="modalOverlay" style="display:none;">
+      <div class="modal-box" id="modalBox"></div>
+    </div>
+
+  </main>
+
+  <!-- ==================== 题库数据 ==================== -->
+  <script src="js/data/chinese.js"></script>
+  <script src="js/data/math.js"></script>
+  <script src="js/data/english.js"></script>
+  <script src="js/data/exams.js"></script>
+
+  <!-- ==================== 核心逻辑 ==================== -->
+  <script src="js/storage.js"></script>
+  <script src="js/schedule.js"></script>
+  <script src="js/rewards.js"></script>
+  <script src="js/generator.js"></script>
+  <script src="js/quiz.js"></script>
+  <script src="js/easter-eggs.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>

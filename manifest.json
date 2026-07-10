@@ -1,0 +1,25 @@
+{
+  "name": "暑假学习小助手",
+  "short_name": "暑假学习",
+  "description": "给一二年级小朋友的假期辅助学习工具，涵盖语文、数学、英语三科",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#FFF8EC",
+  "theme_color": "#FF7B42",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23FFF8EC'/><text y='0.8em' font-size='70' text-anchor='middle' x='50'>🎒</text></svg>",
+      "sizes": "100x100",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%23FFF8EC'/><text y='0.8em' font-size='350' text-anchor='middle' x='256'>🎒</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

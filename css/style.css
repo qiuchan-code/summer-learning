@@ -1,0 +1,357 @@
+/* ================================================================
+   暑假学习小助手 — 全局样式
+   设计方向：浅色 · 手写感 · 活泼 · 不规则 · "活人感"
+   ================================================================ */
+
+/* ─── CSS 变量 ─── */
+:root {
+  --bg: #FFF8EC;
+  --bg-paper: #FFFDF5;
+  --orange: #FF7B42;
+  --red: #E85D3F;
+  --green: #5BAF6B;
+  --blue: #4A90D9;
+  --yellow: #FFE74C;
+  --brown: #4A3728;
+  --brown-light: #8B7355;
+  --gray: #C4B5A5;
+  --gray-light: #EDE5D9;
+  --shadow: 0 3px 8px rgba(74,55,40,0.12);
+  --shadow-lg: 0 6px 20px rgba(74,55,40,0.18);
+  --radius: 16px;
+  --font-hand: 'ZCOOL KuaiLe', cursive;
+  --font-main: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+}
+
+/* ─── 基础重置 ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: var(--font-main);
+  background-color: var(--bg);
+  color: var(--brown);
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  line-height: 1.6;
+  /* 纸张纹理 */
+  background-image:
+    url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+/* ─── 视图容器 ─── */
+#app { max-width: 900px; margin: 0 auto; min-height: 100vh; min-height: 100dvh; }
+.view { display: none; padding: 16px; padding-bottom: 80px; }
+.view.active { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ─── 手写体标题 ─── */
+h1, h2, h3, .door-title, .hand-font {
+  font-family: var(--font-hand);
+  letter-spacing: 0.05em;
+}
+
+/* ─── 首页头部 ─── */
+.home-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0; flex-wrap: wrap; gap: 8px;
+}
+.date-badge {
+  font-family: var(--font-hand); font-size: 1.3rem;
+  background: var(--yellow); padding: 6px 16px;
+  border-radius: 50px; transform: rotate(-2deg);
+  box-shadow: 2px 3px 0 rgba(0,0,0,0.1);
+}
+.week-info { font-size: 0.9rem; color: var(--brown-light); }
+.streak-badge {
+  font-weight: bold; background: var(--red); color: #fff;
+  padding: 4px 12px; border-radius: 50px; font-size: 0.85rem;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+
+/* ─── 吉祥物 ─── */
+.mascot-container {
+  text-align: center; padding: 10px 0; position: relative;
+}
+.mascot {
+  font-size: 3.5rem; cursor: pointer; display: inline-block;
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  user-select: none;
+}
+.mascot:hover { transform: scale(1.15) rotate(-5deg); }
+.mascot:active { transform: scale(0.9) rotate(5deg); }
+.mascot-speech {
+  display: inline-block; background: #fff; padding: 6px 16px;
+  border-radius: 16px; font-size: 0.9rem; box-shadow: var(--shadow);
+  margin-left: 8px; position: relative; top: -12px;
+  animation: bounce 2s ease-in-out infinite;
+  font-family: var(--font-hand);
+}
+.mascot-speech::before {
+  content: ''; position: absolute; left: -8px; top: 50%;
+  border: 6px solid transparent; border-right-color: #fff; transform: translateY(-50%);
+}
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+
+/* ─── 星星积分 ─── */
+.star-jar {
+  text-align: center; padding: 12px; margin: 8px 0;
+  background: var(--bg-paper); border-radius: var(--radius);
+  border: 3px dashed var(--gray); box-shadow: var(--shadow);
+}
+.star-icon { font-size: 1.5rem; }
+.star-count { font-size: 2rem; font-weight: bold; font-family: var(--font-hand); color: var(--orange); }
+.star-rank { display: block; font-size: 0.85rem; color: var(--brown-light); margin-top: 2px; }
+
+/* ─── 考核倒计时 ─── */
+.exam-countdown {
+  text-align: center; padding: 8px; margin: 4px 0;
+  background: var(--gray-light); border-radius: 10px; font-size: 0.95rem;
+}
+
+/* ─── 学科入口按钮（门/便签风格） ─── */
+.subject-doors {
+  display: flex; flex-wrap: wrap; gap: 14px; justify-content: center;
+  padding: 12px 0;
+}
+.subject-door {
+  flex: 1 1 140px; max-width: 220px; min-width: 130px;
+  border: none; border-radius: 20px; padding: 20px 14px;
+  cursor: pointer; transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow: var(--shadow);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  font-family: var(--font-main);
+  position: relative; overflow: hidden;
+}
+.subject-door:nth-child(1) { transform: rotate(-1.5deg); }
+.subject-door:nth-child(2) { transform: rotate(1deg); }
+.subject-door:nth-child(3) { transform: rotate(-1deg); }
+.subject-door:hover { transform: scale(1.04) rotate(0deg); box-shadow: var(--shadow-lg); }
+.subject-door:active { transform: scale(0.96); }
+.subject-door.chinese { background: linear-gradient(135deg, #FFF0EB, #FFE4DC); border: 3px solid var(--red); }
+.subject-door.math { background: linear-gradient(135deg, #F0FAF0, #E0F5E0); border: 3px solid var(--green); }
+.subject-door.english { background: linear-gradient(135deg, #F0F4FA, #E0EAF5); border: 3px solid var(--blue); }
+.subject-door.completed { opacity: 0.7; }
+.subject-door.completed::after {
+  content: '✅'; position: absolute; top: 6px; right: 10px; font-size: 1.2rem;
+}
+.door-icon { font-size: 2.2rem; }
+.door-title { font-size: 1.4rem; font-weight: bold; }
+.door-subtitle { font-size: 0.8rem; color: var(--brown-light); }
+.door-status { font-size: 0.75rem; padding: 3px 10px; border-radius: 20px; background: rgba(255,255,255,0.7); }
+
+/* ─── 考核入口 ─── */
+.exam-entrance { text-align: center; padding: 16px; }
+.exam-btn {
+  font-size: 1.2rem; padding: 16px 32px; border-radius: 50px;
+  background: var(--yellow); border: 3px solid var(--orange);
+  color: var(--brown); cursor: pointer; font-family: var(--font-hand);
+  font-weight: bold; box-shadow: var(--shadow-lg);
+  animation: pulse 1.5s infinite; transition: transform 0.2s;
+}
+.exam-btn:hover { transform: scale(1.05); }
+
+/* ─── 底部导航 ─── */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 900px;
+  display: flex; justify-content: space-around;
+  background: var(--bg-paper); border-top: 2px solid var(--gray-light);
+  padding: 6px 0 env(safe-area-inset-bottom, 6px);
+  z-index: 100;
+}
+.nav-item {
+  border: none; background: none; font-size: 0.85rem;
+  padding: 8px 14px; cursor: pointer; border-radius: 12px;
+  color: var(--brown-light); transition: all 0.2s;
+  font-family: var(--font-main);
+}
+.nav-item.active { color: var(--orange); font-weight: bold; background: rgba(255,123,66,0.1); }
+
+/* ─── 练习/考核头部 ─── */
+.practice-header, .exam-header, .sub-header {
+  display: flex; align-items: center; gap: 12px; padding: 8px 0 12px;
+}
+.back-btn {
+  border: none; background: var(--gray-light); padding: 8px 16px;
+  border-radius: 12px; cursor: pointer; font-size: 0.9rem;
+  color: var(--brown); font-weight: bold;
+}
+.practice-timer, .exam-timer {
+  margin-left: auto; font-weight: bold; font-size: 1rem;
+  background: var(--yellow); padding: 4px 12px; border-radius: 12px;
+}
+
+/* ─── 进度条 ─── */
+.practice-progress {
+  display: flex; align-items: center; gap: 10px; padding: 6px 0 12px;
+}
+.progress-bar { flex: 1; height: 8px; background: var(--gray-light); border-radius: 4px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--green); border-radius: 4px; transition: width 0.3s; }
+.progress-text { font-size: 0.85rem; color: var(--brown-light); white-space: nowrap; }
+
+/* ─── 练习阶段标题 ─── */
+.practice-stage {
+  text-align: center; padding: 8px; font-family: var(--font-hand);
+  font-size: 1.1rem; color: var(--orange);
+}
+
+/* ─── 题目内容区 ─── */
+.practice-content, .exam-content {
+  background: var(--bg-paper); padding: 20px; border-radius: var(--radius);
+  box-shadow: var(--shadow); min-height: 160px;
+  margin-bottom: 12px; border: 2px solid var(--gray-light);
+  /* 练习本横线 */
+  background-image: repeating-linear-gradient(
+    transparent, transparent 31px, #e8e0d5 31px, #e8e0d5 32px
+  );
+  background-attachment: local;
+}
+.practice-content .question-text {
+  font-size: 1.15rem; line-height: 2; padding: 6px 0;
+}
+.practice-content .passage {
+  font-size: 1.05rem; line-height: 1.9; padding: 10px;
+  background: rgba(255,255,255,0.6); border-radius: 8px; margin-bottom: 10px;
+  white-space: pre-wrap;
+}
+.practice-content .pinyin { color: var(--brown-light); font-size: 0.85rem; }
+
+/* ─── 选项按钮 ─── */
+.practice-actions, .exam-actions {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.option-btn {
+  display: block; width: 100%; text-align: left;
+  padding: 14px 18px; border-radius: 14px;
+  border: 2px solid var(--gray-light); background: #fff;
+  font-size: 1.05rem; cursor: pointer; transition: all 0.2s;
+  color: var(--brown); font-family: var(--font-main);
+}
+.option-btn:hover { border-color: var(--orange); background: #FFF5F0; }
+.option-btn:active { transform: scale(0.98); }
+.option-btn.correct { border-color: var(--green); background: #E8F5E9; animation: pop 0.3s; }
+.option-btn.wrong { border-color: var(--red); background: #FFEBEE; animation: shake 0.4s; }
+.option-btn:disabled { pointer-events: none; opacity: 0.85; }
+
+@keyframes pop { 0%{transform:scale(1)} 50%{transform:scale(1.03)} 100%{transform:scale(1)} }
+@keyframes shake {
+  0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)}
+}
+
+/* ─── 数字键盘 ─── */
+.num-pad { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; max-width: 300px; margin: 0 auto; }
+.num-pad button {
+  padding: 16px; font-size: 1.3rem; border-radius: 14px;
+  border: 2px solid var(--gray-light); background: #fff; cursor: pointer;
+  font-family: var(--font-main); transition: all 0.15s;
+}
+.num-pad button:hover { background: var(--gray-light); }
+.num-pad button:active { transform: scale(0.93); background: var(--orange); color: #fff; }
+
+/* ─── 反馈区 ─── */
+.practice-feedback {
+  text-align: center; padding: 10px; min-height: 40px;
+  font-family: var(--font-hand); font-size: 1.1rem;
+}
+.feedback-correct { color: var(--green); }
+.feedback-wrong { color: var(--red); }
+
+/* ─── 考核科目标签 ─── */
+.exam-subject-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+.exam-tab {
+  flex: 1; padding: 10px; border-radius: 12px;
+  border: 2px solid var(--gray-light); background: #fff;
+  cursor: pointer; font-size: 0.9rem; color: var(--brown);
+  font-family: var(--font-main); transition: all 0.2s;
+}
+.exam-tab.active { border-color: var(--orange); background: #FFF5F0; font-weight: bold; }
+
+/* ─── 弹窗 ─── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(74,55,40,0.4);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200; padding: 20px;
+}
+.modal-box {
+  background: var(--bg-paper); padding: 24px; border-radius: 20px;
+  box-shadow: var(--shadow-lg); max-width: 400px; width: 100%;
+  text-align: center; font-family: var(--font-main);
+}
+.modal-box h3 { font-family: var(--font-hand); margin-bottom: 12px; }
+.modal-box .score-big { font-size: 3rem; font-weight: bold; color: var(--orange); font-family: var(--font-hand); }
+.modal-box button {
+  margin: 8px; padding: 10px 24px; border-radius: 14px;
+  border: none; background: var(--orange); color: #fff;
+  font-size: 1rem; cursor: pointer; font-family: var(--font-main);
+  transition: transform 0.2s;
+}
+.modal-box button:hover { transform: scale(1.05); }
+.modal-box button.secondary { background: var(--gray-light); color: var(--brown); }
+
+/* ─── 进度日历 ─── */
+.progress-calendar {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;
+  padding: 12px 0;
+}
+.cal-day {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  border-radius: 10px; font-size: 0.85rem; background: var(--gray-light);
+  font-family: var(--font-hand);
+}
+.cal-day.completed { background: var(--green); color: #fff; }
+.cal-day.partial { background: var(--yellow); }
+.cal-day.exam { background: var(--orange); color: #fff; font-weight: bold; }
+.cal-day.today { border: 3px solid var(--orange); }
+.cal-day.future { opacity: 0.5; }
+
+/* ─── 贴纸相册 ─── */
+.sticker-album { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px,1fr)); gap: 10px; padding: 12px 0; }
+.sticker-slot {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  border-radius: 14px; background: var(--gray-light); font-size: 2rem;
+  border: 2px dashed var(--gray);
+}
+.sticker-slot.collected { border-style: solid; border-color: var(--yellow); background: #fff; animation: pop 0.5s; }
+
+/* ─── 徽章墙 ─── */
+.badge-wall { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px,1fr)); gap: 10px; padding: 12px 0; }
+.badge-item {
+  text-align: center; padding: 12px 8px; border-radius: 14px;
+  background: var(--gray-light); opacity: 0.5; transition: all 0.3s;
+}
+.badge-item.earned { opacity: 1; background: var(--yellow); box-shadow: var(--shadow); }
+.badge-item .badge-icon { font-size: 2rem; }
+.badge-item .badge-name { font-size: 0.75rem; margin-top: 4px; font-family: var(--font-hand); }
+
+/* ─── 设置面板 ─── */
+.settings-panel { display: flex; flex-direction: column; gap: 12px; padding: 16px 0; }
+.settings-panel label { display: flex; align-items: center; gap: 8px; font-size: 1rem; }
+.settings-panel select { padding: 6px 12px; border-radius: 8px; border: 2px solid var(--gray-light); font-size: 1rem; }
+.settings-panel button {
+  padding: 12px; border-radius: 12px; border: 2px solid var(--gray-light);
+  background: #fff; cursor: pointer; font-size: 1rem; color: var(--brown);
+  font-family: var(--font-main); transition: all 0.2s;
+}
+.settings-panel button:hover { background: var(--gray-light); }
+.settings-panel .danger-btn { color: var(--red); border-color: var(--red); }
+
+/* ─── 响应式 ─── */
+@media (min-width: 640px) {
+  .subject-doors { gap: 18px; }
+  .subject-door { min-width: 160px; padding: 24px 18px; }
+  .practice-content { padding: 28px; }
+}
+
+@media (min-width: 1024px) {
+  #app { padding: 0 20px; }
+  .subject-doors { gap: 24px; }
+  .bottom-nav { border-radius: 16px 16px 0 0; }
+}
+
+/* ─── 打印样式 ─── */
+@media print {
+  .bottom-nav, .back-btn, .mascot-container { display: none; }
+  body { background: #fff; }
+}
