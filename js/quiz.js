@@ -186,15 +186,13 @@ const Quiz = {
     return questions;
   },
 
-  /** 为单选题生成干扰项 */
+  /** 为单选题生成干扰项（正确答案始终放在位置0，对应 answer: 0） */
   generateWordOptions(correct, allWords, field) {
     const others = allWords.filter(w => w[field] !== correct[field]);
     const shuffled = [...others].sort(() => Math.random() - 0.5);
     const distractors = shuffled.slice(0, 3).map(w => w[field]);
-    const options = [correct[field], ...distractors];
-    return [...options].sort(() => Math.random() - 0.5); // 打乱，让正确答案不在固定位置
-    // 实际上需要知道正确答案移到了哪里...
-    // 简化处理：正确答案始终放第一位，让 expandEnglishWords 里 answer: 0 生效
+    // 正确答案始终在索引0，非0索引都是干扰项
+    return [correct[field], ...distractors];
   },
 
   /** 生成归类题选项（简化版） */
