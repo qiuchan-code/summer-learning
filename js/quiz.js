@@ -368,6 +368,10 @@ const Quiz = {
 
   /** 渲染填空题（数字输入） */
   renderFillBlank(q, container) {
+    // 清除旧输入框（防止跨视图残留）
+    const oldInput = document.getElementById('fillBlankInput');
+    if (oldInput) oldInput.remove();
+
     // 判断答案是否为数字
     const isNumeric = typeof q.answer === 'number';
 
@@ -467,14 +471,8 @@ const Quiz = {
           (q.explanation ? '。' + q.explanation : '') + '</span>';
     }
 
-    if (this.isExam) {
-      // 考核模式：不显示反馈，直接下一题
-      feedbackEl.innerHTML = '';
-      setTimeout(() => this.nextQuestion(), 300);
-    } else {
-      // 练习模式：延迟后自动进入下一题
-      setTimeout(() => this.nextQuestion(), 1500);
-    }
+    // 考核模式直接下一题，练习模式延迟跳转
+    setTimeout(() => this.nextQuestion(), this.isExam ? 300 : 1500);
   },
 
   /** 提交填空题答案 */

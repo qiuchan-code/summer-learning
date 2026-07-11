@@ -362,12 +362,41 @@ const App = {
     Quiz.startExam(week);
   },
 
+  /** 从日历点击进入指定天学习 */
+  goToDay(dayNum, dateStr) {
+    if (!Auth.isAdmin()) {
+      // 游客只能看第1天
+      if (dayNum > 1) {
+        this.showUpgradeModal();
+        return;
+      }
+    }
+
+    // 覆写日期，让进度保存到对应天
+    Schedule.setOverrideDate(dateStr);
+
+    // 跳到首页，用户可选择学科
+    this.switchView('home');
+    this.refreshHome();
+
+    // 更新标题提示
+    const weekInfo = document.getElementById('weekInfo');
+    if (weekInfo) {
+      weekInfo.textContent = '📅 正在学习：第' + dayNum + '天（' +
+        (new Date(dateStr).getMonth() + 1) + '月' + new Date(dateStr).getDate() + '日）';
+      weekInfo.style.color = 'var(--orange)';
+    }
+  },
+
   /** 返回首页 */
   backToHome() {
     Quiz.stopTimer();
 
     // 检查游客是否完成了第1天
     this.checkGuestDay1Complete();
+
+    // 清除日期覆写
+    Schedule.clearOverride();
 
     this.switchView('home');
     this.refreshHome();
@@ -429,7 +458,7 @@ const App = {
     const data = Storage.load();
     let html = '';
 
-    // 53天日历
+    // 53天日历（全部可点击）
     for (let day = 1; day <= 53; day++) {
       const d = new Date(Schedule.START_DATE);
       d.setDate(d.getDate() + day - 1);
@@ -440,7 +469,7 @@ const App = {
       const progress = data.dailyProgress[dateStr];
       const isExam = (day % 7 === 0) || (day >= 50 && day === 53);
       const today = Schedule.getDayNumber();
-      let cls = 'cal-day';
+      let cls = 'cal-day clickable';
 
       if (day === today) cls += ' today';
       else if (day > today) cls += ' future';
@@ -454,7 +483,8 @@ const App = {
 
       if (isExam) cls += ' exam';
 
-      html += '<div class="' + cls + '">' + day + '</div>';
+      html += '<div class="' + cls + '" onclick="App.goToDay(' + day + ",'" + dateStr + "')\" title=\"" +
+        (d.getMonth() + 1) + '月' + d.getDate() + '日' + (isExam ? ' 考核日' : '') + '\">' + day + '</div>';
     }
     container.innerHTML = html;
 

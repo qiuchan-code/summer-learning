@@ -7,19 +7,32 @@ const Schedule = {
   START_DATE: new Date(2026, 6, 10), // 7月10日（月份从0开始）
   END_DATE: new Date(2026, 7, 31),   // 8月31日
   TOTAL_DAYS: 53,
+  _overrideDate: null,               // 进度日历点击时覆写的日期
 
-  /** 获取今天的日期字符串 'YYYY-MM-DD' */
+  /** 覆写「今天」日期（用于进度日历点击回溯） */
+  setOverrideDate(dateStr) {
+    this._overrideDate = dateStr;
+  },
+
+  /** 清除日期覆写 */
+  clearOverride() {
+    this._overrideDate = null;
+  },
+
+  /** 获取当前的「有效日期」（可能被覆写） */
   getToday() {
+    if (this._overrideDate) return this._overrideDate;
     const d = new Date();
     return d.getFullYear() + '-' +
       String(d.getMonth() + 1).padStart(2, '0') + '-' +
       String(d.getDate()).padStart(2, '0');
   },
 
-  /** 获取当前学习日编号（1~53），未开始返回0，已结束返回54 */
+  /** 获取当前学习日编号（1~53），接受覆写 */
   getDayNumber() {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const dateStr = this._overrideDate || null;
+    const today = dateStr ? new Date(dateStr) : new Date();
+    today.setHours(12, 0, 0, 0); // 避免时区偏移
     const start = new Date(this.START_DATE);
     start.setHours(0, 0, 0, 0);
     const end = new Date(this.END_DATE);
@@ -29,7 +42,7 @@ const Schedule = {
     if (today > end) return this.TOTAL_DAYS + 1;
 
     const diff = Math.floor((today - start) / (1000 * 60 * 60 * 24)) + 1;
-    return Math.min(diff, this.TOTAL_DAYS);
+    return Math.max(1, Math.min(diff, this.TOTAL_DAYS));
   },
 
   /** 获取指定偏移天数的日期字符串 */
