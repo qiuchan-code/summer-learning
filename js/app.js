@@ -192,11 +192,16 @@ const App = {
     // 三科完成状态
     this.refreshSubjectDoors();
 
-    // 考核入口（仅管理员可见）
+    // 考核入口（管理员始终可见）
     const examEntrance = document.getElementById('examEntrance');
     if (examEntrance) {
-      if (isExam && dayNum >= 1 && dayNum <= 53 && Auth.isAdmin()) {
+      if (dayNum >= 1 && dayNum <= 53 && Auth.isAdmin()) {
         examEntrance.style.display = 'block';
+        // 考核日显示不同文字
+        const examBtn = examEntrance.querySelector('.exam-btn');
+        if (examBtn) {
+          examBtn.textContent = isExam ? '🎯 今天是考核日！点击进入' : '📝 进入考核（可自选周数）';
+        }
       } else {
         examEntrance.style.display = 'none';
       }
@@ -317,23 +322,44 @@ const App = {
     Quiz.startPractice(subject);
   },
 
-  /** 打开考核 */
+  /** 打开考核（管理员显示周数选择） */
   openExam() {
-    // 仅管理员可考核
     if (!Auth.isAdmin()) {
       this.showUpgradeModal();
       return;
     }
 
-    const week = Schedule.getWeekNumber();
+    // 显示周数选择弹窗
+    const currentWeek = Schedule.getWeekNumber();
+    let weekBtns = '';
+    for (let w = 1; w <= 8; w++) {
+      const isCurrent = w === currentWeek;
+      const label = w === 8 ? '🏆 期末' : '第' + w + '周';
+      weekBtns += '<button class="week-select-btn' + (isCurrent ? ' current' : '') +
+        '" onclick="App.startExamWeek(' + w + ')" style="display:block;width:100%;margin:6px 0;padding:12px;' +
+        'border:2px solid ' + (isCurrent ? 'var(--orange)' : 'var(--gray-light)') +
+        ';border-radius:12px;background:' + (isCurrent ? '#FFF5F0' : '#fff') +
+        ';font-size:1rem;cursor:pointer;font-family:var(--font-hand);">' +
+        label + (isCurrent ? ' ← 当前' : '') + '</button>';
+    }
+
+    this.showModal('📝 选择考核周数',
+      '<p style="text-align:center;color:var(--brown-light);margin-bottom:8px;">全部考卷已开放，可随时挑战任意一周</p>' +
+      '<div style="max-height:50vh;overflow-y:auto;">' + weekBtns + '</div>',
+      [{ text: '取消', cls: 'secondary', action: () => this.closeModal() }]
+    );
+  },
+
+  /** 开始指定周的考核 */
+  startExamWeek(week) {
+    this.closeModal();
     const titleEl = document.getElementById('examTitle');
     if (titleEl) {
       if (week === 8) titleEl.textContent = '🏆 期末考试';
       else titleEl.textContent = '📝 第' + week + '周考核';
     }
-
     this.switchView('exam');
-    Quiz.startExam();
+    Quiz.startExam(week);
   },
 
   /** 返回首页 */

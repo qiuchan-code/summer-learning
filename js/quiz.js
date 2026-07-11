@@ -43,29 +43,29 @@ const Quiz = {
    * 加载练习题目（混合题库 + 动态生成）
    */
   loadPracticeQuestions(subject) {
-    const week = Schedule.getWeekNumber();
+    // 全部内容开放，不限制周数
+    const maxWeek = 7;
 
     switch (subject) {
       case 'chinese': {
-        // 从语文题库中选1篇阅读（含8道小题）
+        // 从全部语文题库随机选1篇阅读
         if (typeof CHINESE_READINGS === 'undefined') return [];
-        const suitable = CHINESE_READINGS.filter(r => r.week <= week);
-        const reading = suitable[Math.floor(Math.random() * suitable.length)];
+        const reading = CHINESE_READINGS[Math.floor(Math.random() * CHINESE_READINGS.length)];
         return this.expandReading(reading);
       }
 
       case 'math': {
-        // 口算10 + 笔算15 + 应用题5 = 30题
-        const oral = Generator.generate(week, 10, 'oral');
-        const written = Generator.generate(week, 15, 'written');
-        const word = Generator.generate(week, 5, 'word');
+        // 口算10 + 笔算15 + 应用题5 = 30题，使用全难度范围
+        const oral = Generator.generate(maxWeek, 10, 'oral');
+        const written = Generator.generate(maxWeek, 15, 'written');
+        const word = Generator.generate(maxWeek, 5, 'word');
         return [...oral, ...written, ...word];
       }
 
       case 'english': {
-        // 从英语词库中选今日词汇
+        // 从全部200词中随机选
         if (typeof ENGLISH_WORDS === 'undefined') return [];
-        const words = this.pickDailyWords(week, 8);
+        const words = this.pickDailyWords(maxWeek, 8);
         return this.expandEnglishWords(words);
       }
 
@@ -249,7 +249,7 @@ const Quiz = {
   /**
    * 开始考核
    */
-  startExam() {
+  startExam(weekNum) {
     this.isExam = true;
     this.examSubject = 'chinese';
     this.examResults = {};
@@ -258,10 +258,10 @@ const Quiz = {
     this.timeElapsed = 0;
     this.timeLimit = 30 * 60; // 语文30分钟
 
-    // 加载考核题
-    const week = Schedule.getWeekNumber();
+    // 加载考核题（支持自选周数，默认当前周）
+    const week = weekNum || Schedule.getWeekNumber();
     if (typeof EXAM_SETS !== 'undefined') {
-      const exam = EXAM_SETS.find(e => e.week === week) || EXAM_SETS[0];
+      const exam = EXAM_SETS.find(e => e.week === week) || EXAM_SETS[week - 1] || EXAM_SETS[0];
       if (exam) {
         this.examQuestions = exam;
       }
