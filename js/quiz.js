@@ -306,7 +306,7 @@ const Quiz = {
   renderQuestion() {
     const contentEl = document.getElementById(this.isExam ? 'examContent' : 'practiceContent');
     const actionsEl = document.getElementById(this.isExam ? 'examActions' : 'practiceActions');
-    const feedbackEl = document.getElementById('practiceFeedback');
+    const feedbackEl = document.getElementById(this.isExam ? 'examFeedback' : 'practiceFeedback');
     const stageEl = document.getElementById('practiceStage');
 
     if (!contentEl || !actionsEl) return;
@@ -455,15 +455,16 @@ const Quiz = {
     const isCorrect = choice === q.answer;
     this.answers.push({ questionId: q.id, userAnswer: choice, correctAnswer: q.answer, isCorrect });
 
-    // 显示反馈
-    const buttons = document.querySelectorAll('.option-btn');
+    // 显示反馈（限定在当前视图的按钮范围内，避免跨视图污染）
+    const actionsEl = document.getElementById(this.isExam ? 'examActions' : 'practiceActions');
+    const buttons = actionsEl ? actionsEl.querySelectorAll('.option-btn') : [];
     buttons.forEach((btn, i) => {
       btn.disabled = true;
       if (i === q.answer) btn.classList.add('correct');
       if (i === choice && !isCorrect) btn.classList.add('wrong');
     });
 
-    const feedbackEl = document.getElementById('practiceFeedback');
+    const feedbackEl = document.getElementById(this.isExam ? 'examFeedback' : 'practiceFeedback');
     if (feedbackEl) {
       feedbackEl.innerHTML = isCorrect
         ? '<span class="feedback-correct">✅ 太棒了！' + (q.explanation ? ' ' + q.explanation : '') + '</span>'
@@ -493,7 +494,7 @@ const Quiz = {
 
     this.answers.push({ questionId: q.id, userAnswer, correctAnswer: q.answer, isCorrect });
 
-    const feedbackEl = document.getElementById('practiceFeedback');
+    const feedbackEl = document.getElementById(this.isExam ? 'examFeedback' : 'practiceFeedback');
     if (feedbackEl) {
       feedbackEl.innerHTML = isCorrect
         ? '<span class="feedback-correct">✅ 太棒了！答案是 ' + q.answer + '</span>'
@@ -513,7 +514,7 @@ const Quiz = {
 
     this.answers.push({ questionId: q.id, userAnswer, correctAnswer: q.answer, isCorrect });
 
-    const feedbackEl = document.getElementById('practiceFeedback');
+    const feedbackEl = document.getElementById(this.isExam ? 'examFeedback' : 'practiceFeedback');
     if (feedbackEl) {
       feedbackEl.innerHTML = isCorrect
         ? '<span class="feedback-correct">✅ 太棒了！</span>'

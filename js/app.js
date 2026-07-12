@@ -339,7 +339,7 @@ const App = {
         '" onclick="App.startExamWeek(' + w + ')" style="display:block;width:100%;margin:6px 0;padding:12px;' +
         'border:2px solid ' + (isCurrent ? 'var(--orange)' : 'var(--gray-light)') +
         ';border-radius:12px;background:' + (isCurrent ? '#FFF5F0' : '#fff') +
-        ';font-size:1rem;cursor:pointer;font-family:var(--font-hand);">' +
+        ';color:var(--brown);font-size:1rem;cursor:pointer;font-family:var(--font-hand);">' +
         label + (isCurrent ? ' ← 当前' : '') + '</button>';
     }
 
